@@ -21,7 +21,7 @@ for (x, y, w, h) in face_detected:
     cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 3)
 
 for (x, y, w, h) in eyes_detected:
-    cv2.circle(img, (x + int(h/2), y + int(w/2)), int(w/2), (255, 0, 0), 3)
+    cv2.circle(img, (x + int(h / 2), y + int(w / 2)), int(w / 2), (255, 0, 0), 3)
 
 cv2.imshow('face', img)
 cv2.waitKey()
