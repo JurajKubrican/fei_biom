@@ -23,14 +23,14 @@ for (x, y, w, h) in face_detected:
     roi_color = img[y:y + h, x:x + w]
     eyes_detected = eyes.detectMultiScale(roi_gray, 1.3, 5)
 
-<<<<<<< Updated upstream
+
 for (x, y, w, h) in eyes_detected:
     cv2.circle(img, (x + int(h / 2), y + int(w / 2)), int(w / 2), (255, 0, 0), 3)
-=======
+
     print(eyes_detected)
     for (x, y, w, h) in eyes_detected:
         cv2.circle(roi_gray, (x + int(h/2), y + int(w/2)), int(w/2), (255, 0, 0), 3)
->>>>>>> Stashed changes
+
 
 cv2.imshow('face', gray)
 cv2.waitKey()
