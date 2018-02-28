@@ -1,37 +1,41 @@
+from pathlib import Path
+
 import cv2
 
-face = cv2.CascadeClassifier('../cascades/haarcascade_frontalface_default.xml')
-eyes = cv2.CascadeClassifier('../cascades/haarcascade_eye.xml')
+from os import listdir
 
-if face.empty():
-    raise IOError('Unable to load the face cascade classifier xml file')
+fileDir = '../cache/extract/ear.zip/ucho/'
+outDir = '../cache/marked/face.zip/gt_db/'
+classifier = '../cascades/haarcascade_mcs_leftear.xml'
 
-if eyes.empty():
-    raise IOError('Unable to load the eyes cascade classifier xml file')
+Path(outDir).mkdir(parents=True, exist_ok=True)
 
-img = cv2.imread('../cache/extract/face.zip/gt_db/s01/01.jpg')
+def detectFace(file):
+    face = cv2.CascadeClassifier('../cascades/haarcascade_frontalface_default.xml')
+    eyes = cv2.CascadeClassifier('../cascades/haarcascade_eye.xml')
 
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    if face.empty():
+        raise IOError('Unable to load the face cascade classifier xml file ¯\_(ツ)_/¯')
+    if eyes.empty():
+        raise IOError('Unable to load the eyes cascade classifier xml file ¯\_(ツ)_/¯')
+    img = cv2.imread(file)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-face_detected = face.detectMultiScale(gray, 1.3, 5)
+    detedtedFaces = face.detectMultiScale(gray, 1.3, 5)
 
+    for (x, y, w, h) in detedtedFaces:
+        cv2.rectangle(gray, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        face = gray[y:y + h, x:x + w]
+        detectedEyes = eyes.detectMultiScale(face, 1.3, 5)
+        for (ex, ey, ew, eh) in detectedEyes:
+            cv2.circle(face, (ex + int(eh / 2), ey + int(eh / 2)), int(eh / 2), (255, 0, 0), 2)
 
+    cv2.imshow('face', gray)
+    cv2.waitKey()
+    cv2.destroyAllWindows()
 
-for (x, y, w, h) in face_detected:
-    cv2.rectangle(gray, (x, y), (x + w, y + h), (0, 255, 0), 3)
-    roi_gray = gray[y:y + h, x:x + w]
-    roi_color = img[y:y + h, x:x + w]
-    eyes_detected = eyes.detectMultiScale(roi_gray, 1.3, 5)
+def main():
+    detectFace('../cache/extract/face.zip/gt_db/s01/09.jpg')
 
-
-for (x, y, w, h) in eyes_detected:
-    cv2.circle(img, (x + int(h / 2), y + int(w / 2)), int(w / 2), (255, 0, 0), 3)
-
-    print(eyes_detected)
-    for (x, y, w, h) in eyes_detected:
-        cv2.circle(roi_gray, (x + int(h/2), y + int(w/2)), int(w/2), (255, 0, 0), 3)
-
-
-cv2.imshow('face', gray)
-cv2.waitKey()
-cv2.destroyAllWindows()
+if __name__ == "__main__":
+    main()
