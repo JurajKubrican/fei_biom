@@ -20,9 +20,9 @@ def detect(file):
         raise IOError('classifier xml not found :/')
 
     img = cv2.imread(fileDir + file)
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRY)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     left_ear = left_ear_cascade.detectMultiScale(gray, 1.15, 5,
-                                                 # minSize=(130, 200)
+                                                 # minSize=(130, 220)
                                                  )
 
     if not len(left_ear):
