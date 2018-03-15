@@ -1,8 +1,9 @@
 from pathlib import Path
 
-file = 'ear.zip'
-file = 'iris.zip'
+
 file = 'face.zip'
+file = 'iris.zip'
+file = 'ear.zip'
 
 # DOWNLOAD
 dl_dir = 'cache/raw/'
