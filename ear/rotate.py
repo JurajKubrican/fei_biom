@@ -2,11 +2,13 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+import pickle as p
 
 from os import listdir
 
 fileDir = '../cache/extract/ear.zip/ucho/'
-outDir = '../cache/marked/ear.zip/'
+dumpFile = '../cache/marked/ear.zip/rects.pickle'
+outDir = '../cache/ellipse/ear.zip/'
 classifier = '../cascades/haarcascade_mcs_leftear.xml'
 
 margin = 25
@@ -14,72 +16,83 @@ margin = 25
 Path(outDir).mkdir(parents=True, exist_ok=True)
 
 
-def find_contours(gray):
-    gray = cv2.cvtColor(gray, cv2.COLOR_BGR2GRAY)
-    gray = cv2.Canny(gray, 50, 80, apertureSize=3, L2gradient=False)
-    # print(gray.shape)
-    # # ret, gray = cv2.threshold(gray, 160, 250, 0)
+def preprocess(file):
+    img = cv2.imread(fileDir + file)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    gray = cv2.equalizeHist(gray)
+    gray = cv2.GaussianBlur(gray, (3, 3), 10)
+    return gray, img
+
+
+def diagonal(p1, p2):
+    return np.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
+
+
+def find_contours(processed, orig, rect, filename):
     # print(gray.shape)
 
-    img, cnt, hierarchy = cv2.findContours(image=gray,
-                                           mode=cv2.RETR_TREE,
-                                           method=cv2.CHAIN_APPROX_NONE)
-
-    cnt = np.array(cnt[0])
-    hierarchy = np.array(hierarchy)
+    ret, canny = cv2.threshold(processed, 160, 250, 0)
+    canny = cv2.Canny(canny, 56, 90, apertureSize=3, L2gradient=False)
     # print(gray.shape)
-    # print(img.shape)
-    # print(cnt.shape)
-    # print(cnt)
-    # print(hierarchy)
-    # .shape)
-    # cv2.imshow('canny', img)
+
+    _, cnts, hierarchy = cv2.findContours(image=canny,
+                                          mode=cv2.RETR_CCOMP,
+                                          method=cv2.CHAIN_APPROX_NONE)
+
+    cnts = np.array(cnts)
+    minLen = 1000
+    best = 0
+    allEllipses = orig.copy()
+    len2 = diagonal((0, 0), (rect[2], rect[3]))
+    for i, cnt in enumerate(cnts):
+
+        if (cnt.shape[0] < 7):
+            continue
+
+        (c1, c2, angle) = cv2.fitEllipse(cnt)
+
+        len = diagonal((0, 0), c2)
+        # print(len, len2)
+
+        if np.sqrt(len ** 2 + len2 ** 2) < minLen:
+            best = i
+
+        allEllipses = cv2.ellipse(allEllipses,
+                                  (c1, c2, angle),
+                                  color=(0, 255, 0),
+                                  thickness=3)
+        # cv2.imshow('all', allEllipses)
+        # cv2.waitKey()
+
     # cv2.waitKey()
-    gray = cv2.drawContours(gray, cnt, contourIdx=-1, color=(255, 0, 0))
-    cv2.imshow('gray', gray)
-    cv2.imshow('img', img)
 
-    ellipse = cv2.fitEllipse(cnt)
-    print(ellipse)
-    ellipse_img = cv2.ellipse(img,
-                              center=ellipse[0],
-                              axes=ellipse[1],
-                              angle=ellipse[2],
-                              color=(0, 255, 0))
-    # Draw both contours onto the separate images
+    (c1, c2, angle) = cv2.fitEllipse(cnts[best])
+    # print(filename + ' - ')
+    # print(c1, c2, diagonal(c1, c2))
 
-    # cnt = contours[0]
-    # cnt = np.array(cnt, dtype=np.uint32)
+    orig = cv2.ellipse(orig,
+                       (c1, c2, angle),
+                       color=(0, 255, 0),
+                       thickness=3)
 
-    cv2.imshow('sss', ellipse_img)
-    cv2.waitKey()
+    cv2.imwrite(outDir + file, orig)
 
 
 def detect(file):
-    left_ear_cascade = cv2.CascadeClassifier(classifier)
-
-    if left_ear_cascade.empty():
-        raise IOError('classifier xml not found :/')
-
-    img = cv2.imread(fileDir + file)
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    gray = cv2.equalizeHist(gray)
-    # gray = cv2.blur(gray, 1)
-
-    cv2.imshow("Ucho", gray)
-
-    find_contours(img)
+    processed, orig = preprocess(file)
+    dump = p.load(open(dumpFile, 'rb'))
+    find_contours(processed, orig, dump[file], file)
 
 
 files = listdir(fileDir)
 
 detected = []
-im = detect(files[10])
 for file in files:
     if (file == "explain2.txt"):
         continue
 
     im = detect(file)
-    break
+    # break
 
 cv2.waitKey()

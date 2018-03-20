@@ -2,6 +2,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+import pickle as p
 
 from os import listdir
 
@@ -9,7 +10,7 @@ fileDir = '../cache/extract/ear.zip/ucho/'
 outDir = '../cache/marked/ear.zip/'
 classifier = '../cascades/haarcascade_mcs_leftear.xml'
 
-margin = 25
+margin = 30
 
 Path(outDir).mkdir(parents=True, exist_ok=True)
 
@@ -69,7 +70,7 @@ def detect(file):
 
     if not len(left_ear):
         cv2.imwrite(outDir + file, grayOrig)
-        return ()
+        return ((), ())
 
     bestX = 0
     bestY = 0
@@ -84,23 +85,30 @@ def detect(file):
 
     gray = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
 
+    rect = (bestX, bestY, maxW, maxH)
+
     cv2.rectangle(gray, (bestX - margin, bestY - margin), (bestX + maxW + 2 * margin, bestY + maxH + 2 * margin),
                   (0, 255, 0), 3)
 
     cv2.imwrite(outDir + file, gray)
-    return left_ear
+    return left_ear, rect
 
 
 files = listdir(fileDir)
 
 detected = []
+rects = dict()
 for file in files:
     if (file == "explain2.txt"):
         continue
-
-    im = detect(file)
+    rects[file] = (0, 0, 300, 400)
+    im, rect = detect(file)
     if im.__len__():
-        detected.append(im)
+        detected.append(rect)
+    if rect.__len__():
+        rects[file] = rect
+
+p.dump(rects, open(outDir + 'rects.pickle', "wb"))
 
 print('uspesnost: ' + str(detected.__len__() / files.__len__()))
 print('in: ' + str(files.__len__()))
