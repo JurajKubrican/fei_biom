@@ -66,23 +66,62 @@ def alignFace(face, leftEye, rightEye):
     output = cv2.warpAffine(face, M, (faceW, faceH))
     return output
 
+def PCA(dirFaces):
+    testMatrix = None
+    folders = os.listdir(dirFaces)
+    for folder in folders:
+        faces = os.listdir(dirFaces+"/"+folder)
+        print(dirFaces+folder)
+        for face in faces:
+            img = cv2.imread(dirFaces+folder+"/"+face)
+            if img is None:
+                print("¯\_(ツ)_/¯ Unable to load "+ dirFaces+folder+"/"+face)
+                continue
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            size = gray.shape
+            w=size[0]
+            h=size[1]
+            grayVector = gray.reshape(w*h)
+            try:
+                testMatrix = np.vstack((testMatrix, grayVector))
+            except:
+                testMatrix = grayVector
+    print("Computing mean and Eigen vectors")
+    mean, eigenVectors = cv2.PCACompute(testMatrix, mean=None, maxComponents=len(testMatrix))
+
+    # averageFace = mean.reshape(size)
+    # cv2.imwrite(dirFaces+"/average.jpg", averageFace)
+    print("Computing weights")
+    all = cv2.PCAProject(testMatrix, mean, eigenVectors)
+    print(type(all[0]))
+    print("done?")
+
+
+
+
+
+
 
 def main():
-    test = detectFace('../cache/extract/face.zip/gt_db/s01/02.jpg')
-    folders = os.listdir(fileDir)
-    totalPictures = 0
-    facesDetected = 0
-    for folder in folders:
-        pictures = os.listdir(fileDir + folder)
-        if not (os.path.exists(outDir + folder)):
-            os.mkdir(outDir + folder)
-        print(fileDir + folder)
-        for picture in pictures:
-            face = detectFace(fileDir + folder + '/' + picture)
-            totalPictures += 1
-            if not (face is None):
-                cv2.imwrite(outDir + '/' + folder + '/' + picture, face)
-                facesDetected += 1
+    # test = detectFace('../cache/extract/face.zip/gt_db/s01/02.jpg')
+    # folders = os.listdir(fileDir)
+    # totalPictures = 0
+    # facesDetected = 0
+    # for folder in folders:
+    #     pictures = os.listdir(fileDir + folder)
+    #     if not (os.path.exists(outDir + folder)):
+    #         os.mkdir(outDir + folder)
+    #     print(fileDir + folder)
+    #     for picture in pictures:
+    #         face = detectFace(fileDir + folder + '/' + picture)
+    #         totalPictures += 1
+    #         if not (face is None):
+    #             cv2.imwrite(outDir + '/' + folder + '/' + picture, face)
+    #             facesDetected += 1
+    #
+    # percent = (facesDetected*100)/totalPictures
+    # print("Detected "+str(percent)+"% of faces")
+    PCA(outDir)
 
 
 if __name__ == "__main__":
