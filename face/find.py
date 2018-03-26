@@ -3,6 +3,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 import os
+from skimage import feature
 
 fileDir = '../cache/extract/face.zip/gt_db/'
 outDir = '../cache/marked/face.zip/gt_db/'
@@ -112,6 +113,30 @@ def doTheHOG(dirFaces):
             hog_histograms.append(histogram)
     return hog_histograms
 
+def doTheLPB(dirFaces):
+    folders = os.listdir(dirFaces)
+    numpoints = 24
+    radius = 8
+    eps = 1e-7
+    lbp_histograms = []
+    for folder in folders:
+        faces = os.listdir(dirFaces + "/" + folder)
+        print(dirFaces + folder)
+        for face in faces:
+            img = cv2.imread(dirFaces + folder + "/" + face)
+            if img is None:
+                print("¯\_(ツ)_/¯ Unable to load " + dirFaces + folder + "/" + face)
+                continue
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            lbp = feature.local_binary_pattern(gray, numpoints, radius, method="uniform")
+            (hist, _) = np.histogram(lbp.ravel(),
+                                     bins=np.arange(0, numpoints + 3),
+                                     range=(0, numpoints + 2))
+
+            hist = hist.astype("float")
+            hist /= (hist.sum() + eps)
+            lbp_histograms.append(hist)
+    return lbp_histograms
 
 
 def main():
@@ -134,8 +159,8 @@ def main():
     # percent = (facesDetected*100)/totalPictures
     # print("Detected "+str(percent)+"% of faces")
     # doThePCA(outDir)
-    doTheHOG(outDir)
-
+    # doTheHOG(outDir)
+    print(doTheLPB(outDir))
 
 if __name__ == "__main__":
     main()
