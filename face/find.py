@@ -66,7 +66,7 @@ def alignFace(face, leftEye, rightEye):
     output = cv2.warpAffine(face, M, (faceW, faceH))
     return output
 
-def PCA(dirFaces):
+def doThePCA(dirFaces):
     testMatrix = None
     folders = os.listdir(dirFaces)
     for folder in folders:
@@ -93,12 +93,24 @@ def PCA(dirFaces):
     # cv2.imwrite(dirFaces+"/average.jpg", averageFace)
     print("Computing weights")
     all = cv2.PCAProject(testMatrix, mean, eigenVectors)
-    print(type(all[0]))
-    print("done?")
+    return all
 
-
-
-
+def doTheHOG(dirFaces):
+    hog = cv2.HOGDescriptor()
+    hog_histograms = []
+    folders = os.listdir(dirFaces)
+    for folder in folders:
+        faces = os.listdir(dirFaces + "/" + folder)
+        print(dirFaces + folder)
+        for face in faces:
+            img = cv2.imread(dirFaces + folder + "/" + face)
+            if img is None:
+                print("¯\_(ツ)_/¯ Unable to load " + dirFaces + folder + "/" + face)
+                continue
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            histogram = hog.compute(gray)
+            hog_histograms.append(histogram)
+    return hog_histograms
 
 
 
@@ -121,7 +133,8 @@ def main():
     #
     # percent = (facesDetected*100)/totalPictures
     # print("Detected "+str(percent)+"% of faces")
-    PCA(outDir)
+    # doThePCA(outDir)
+    doTheHOG(outDir)
 
 
 if __name__ == "__main__":
