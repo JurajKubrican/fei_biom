@@ -39,7 +39,7 @@ def detect(file):
             gray = cv2.resize(gray, (0, 0), fx=(scale / 100), fy=1)
             left_ear = left_ear_cascade.detectMultiScale(gray, 1.15, 5)
             if len(left_ear):
-                print('streach: ' + str(scale))
+                print('stretch: ' + str(scale))
                 break
 
     if not len(left_ear):
@@ -66,6 +66,7 @@ def detect(file):
 
     if not len(left_ear):
         gray = cv2.equalizeHist(gray)
+        gray = cv2.GaussianBlur(gray, (7, 3), 15)
         left_ear = left_ear_cascade.detectMultiScale(gray, 1.15, 5)
 
     if not len(left_ear):
@@ -101,7 +102,7 @@ rects = dict()
 for file in files:
     if (file == "explain2.txt"):
         continue
-    rects[file] = (0, 0, 300, 400)
+    rects[file] = (50, 50, 250, 350)
     im, rect = detect(file)
     if im.__len__():
         detected.append(rect)
