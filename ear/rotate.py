@@ -50,11 +50,12 @@ def ellipse_mask(image, ellipse):
     image = cv2.warpAffine(image, tr, (rows, cols))
 
     # rotate
+    if angle > 90:
+        angle = 180 + angle
     rot = cv2.getRotationMatrix2D((rows / 2, cols / 2), angle, 1)
     image = cv2.warpAffine(image, rot, (rows, cols))
 
     # stretch
-    print(rows, cols)
     image = cv2.resize(image, (0, 0), fx=(150 / size[0]), fy=(200 / size[1]))
 
     c = (int(image.shape[0] / 2), int(image.shape[1] / 2))
@@ -137,7 +138,7 @@ def find_contours(processed, orig, rect, file):
 
     image = ellipse_mask(orig, best_ellipse)
 
-    print(best_ellipse, best)
+    # print(best_ellipse, best)
 
     # c aitKey()
     #
@@ -171,9 +172,9 @@ for file in files:
     if (file == "explain2.txt"):
         continue
 
-    im = detect("31-2.BMP")
-    im = detect("71-2.BMP")
-    break
+    # im = detect("31-2.BMP")
+    # im = detect("71-2.BMP")
+    # break
     im = detect(file)
 
 # cv2.waitKey()
