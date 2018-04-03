@@ -67,22 +67,23 @@ def alignFace(face, leftEye, rightEye):
     output = cv2.warpAffine(face, M, (faceW, faceH))
     return output
 
+
 def doThePCA(dirFaces):
     testMatrix = None
     folders = os.listdir(dirFaces)
     for folder in folders:
-        faces = os.listdir(dirFaces+"/"+folder)
-        print(dirFaces+folder)
+        faces = os.listdir(dirFaces + "/" + folder)
+        print(dirFaces + folder)
         for face in faces:
-            img = cv2.imread(dirFaces+folder+"/"+face)
+            img = cv2.imread(dirFaces + folder + "/" + face)
             if img is None:
-                print("¯\_(ツ)_/¯ Unable to load "+ dirFaces+folder+"/"+face)
+                print("¯\_(ツ)_/¯ Unable to load " + dirFaces + folder + "/" + face)
                 continue
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             size = gray.shape
-            w=size[0]
-            h=size[1]
-            grayVector = gray.reshape(w*h)
+            w = size[0]
+            h = size[1]
+            grayVector = gray.reshape(w * h)
             try:
                 testMatrix = np.vstack((testMatrix, grayVector))
             except:
@@ -96,22 +97,24 @@ def doThePCA(dirFaces):
     all = cv2.PCAProject(testMatrix, mean, eigenVectors)
     return all
 
+
 def doTheHOG(dirFaces):
-    hog = cv2.HOGDescriptor()
+    hog = cv2.HOGDescriptor((128, 128), (16, 16), (8, 8), (8, 8), 9)
     hog_histograms = []
     folders = os.listdir(dirFaces)
     for folder in folders:
         faces = os.listdir(dirFaces + "/" + folder)
         print(dirFaces + folder)
         for face in faces:
-            img = cv2.imread(dirFaces + folder + "/" + face)
+            img = cv2.imread(dirFaces + folder + "/" + face, 0)
             if img is None:
                 print("¯\_(ツ)_/¯ Unable to load " + dirFaces + folder + "/" + face)
                 continue
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            histogram = hog.compute(gray)
+            # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            histogram = hog.compute(img)
             hog_histograms.append(histogram)
     return hog_histograms
+
 
 def doTheLPB(dirFaces):
     folders = os.listdir(dirFaces)
@@ -139,6 +142,17 @@ def doTheLPB(dirFaces):
     return lbp_histograms
 
 
+def doTheBow(inData):
+    dictSize = 50
+    bow = cv2.BOWKMeansTrainer(dictSize)
+    print("Initializing Bag of words data")
+    for data in inData:
+        bow.add(data)
+
+    print("Clustering BOW data")
+    return bow.cluster()
+
+
 def main():
     # test = detectFace('../cache/extract/face.zip/gt_db/s01/02.jpg')
     # folders = os.listdir(fileDir)
@@ -159,8 +173,12 @@ def main():
     # percent = (facesDetected*100)/totalPictures
     # print("Detected "+str(percent)+"% of faces")
     # doThePCA(outDir)
-    # doTheHOG(outDir)
-    print(doTheLPB(outDir))
+    print("HOG")
+    print(doTheBow(doTheHOG(outDir)))
+    print("PCA")
+    print(doTheBow(doThePCA(outDir)))
+    # print(doTheLPB(outDir))
+
 
 if __name__ == "__main__":
     main()
