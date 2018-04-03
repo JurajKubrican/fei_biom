@@ -1,5 +1,5 @@
 from pathlib import Path
-
+from matplotlib import pyplot as plt
 import cv2
 import numpy as np
 import os
@@ -143,14 +143,17 @@ def doTheLPB(dirFaces):
 
 
 def doTheBow(inData):
-    dictSize = 50
+    dictSize = 32
     bow = cv2.BOWKMeansTrainer(dictSize)
     print("Initializing Bag of words data")
     for data in inData:
-        bow.add(data)
-
+        for i in range(0, 36):
+            bow.add(data[i * 225:225 + (i * 225)])
+        break
     print("Clustering BOW data")
-    return bow.cluster()
+    dictionary = bow.cluster()
+
+    return dictionary
 
 
 def main():
@@ -173,11 +176,11 @@ def main():
     # percent = (facesDetected*100)/totalPictures
     # print("Detected "+str(percent)+"% of faces")
     # doThePCA(outDir)
-    print("HOG")
-    print(doTheBow(doTheHOG(outDir)))
-    print("PCA")
-    print(doTheBow(doThePCA(outDir)))
-    # print(doTheLPB(outDir))
+    hog = doTheHOG(outDir)
+    bow = doTheBow(hog)
+
+    print(bow)
+
 
 
 if __name__ == "__main__":
