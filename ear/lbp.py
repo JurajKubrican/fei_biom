@@ -8,7 +8,7 @@ from skimage import feature
 from matplotlib import pyplot as plt
 from os import listdir
 
-fileDir = '../cache/extract/ear.zip/ucho/'
+fileDir = '../cache/ellipse/ear.zip/'
 outDir = '../cache/lbp/'
 dumpFile = outDir + 'ear.pickle'
 classifier = '../cascades/haarcascade_mcs_leftear.xml'
