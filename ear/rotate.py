@@ -6,14 +6,14 @@ import pickle as p
 
 from os import listdir
 
-fileDir = '../cache/extract/ear.zip/ucho/'
-dumpFile = '../cache/marked/ear.zip/rects.pickle'
-outDir = '../cache/ellipse/ear.zip/'
+file_dir = '../cache/extract/ear.zip/ucho/'
+dump_file = '../cache/marked/ear.zip/rects.pickle'
+out_dir = '../cache/ellipse/ear.zip/'
 classifier = '../cascades/haarcascade_mcs_leftear.xml'
 
 margin = 25
 
-Path(outDir).mkdir(parents=True, exist_ok=True)
+Path(out_dir).mkdir(parents=True, exist_ok=True)
 
 
 # def generate_gauss():
@@ -66,7 +66,7 @@ def ellipse_mask(image, ellipse):
 
 
 def preprocess(file):
-    img = cv2.imread(fileDir + file)
+    img = cv2.imread(file_dir + file)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     # gray = np.asarray(gray *  generate_gauss(),'uint8')
     gray = cv2.equalizeHist(gray)
@@ -150,22 +150,22 @@ def find_contours(processed, orig, rect, file):
     # print(rot)
     #
     if best:
-        cv2.imwrite(outDir + file, image)
-    # cv2.imwrite(outDir + file + ".bmp", filtered_ellipses)
+        cv2.imwrite(out_dir + file, image)
+    # cv2.imwrite(out_dir + file + ".bmp", filtered_ellipses)
     #
-    # cv2.imwrite(outDir + file, all_ellipses)
-    # cv2.imwrite(outDir + file + ".bmp", filtered_ellipses)
+    # cv2.imwrite(out_dir + file, all_ellipses)
+    # cv2.imwrite(out_dir + file + ".bmp", filtered_ellipses)
 
 
 def detect(file):
     processed, orig = preprocess(file)
-    dump = p.load(open(dumpFile, 'rb'))
+    dump = p.load(open(dump_file, 'rb'))
 
     find_contours(processed, orig, dump[file], file)
     # find_contours(processed, processed, dump[file], file)
 
 
-files = listdir(fileDir)
+files = listdir(file_dir)
 
 detected = []
 for file in files:
