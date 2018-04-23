@@ -1,3 +1,4 @@
+import pickle
 from pathlib import Path
 
 import cv2
@@ -30,7 +31,9 @@ average = np.asarray(mean.reshape(size), 'uint8')
 eigvec = np.asarray(eigvec)
 vec = cv2.PCAProject(pca_source, mean, eigvec)
 
-print(vec)
+output = {}
 
-# cv2.imshow("/average.jpg", average)
-# cv2.waitKey()
+for i in range(len(labels)):
+    output[labels[i]] = vec[i]
+
+pickle.dump(output, open(dump_file, 'wb'))
