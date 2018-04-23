@@ -52,33 +52,33 @@ for label_1 in lbp_data:
             continue
         dist_lbp_e, dist_lbp_m, dist_pca_e, dist_pca_m = distances(label_1, label_2)
 
-        if (label_1[:2] == label_2[:2]):
+        if label_1[:2] == label_2[:2]:
+            if dist_lbp_e < thresholds[0]:
+                results[0] += 1
+
+            if dist_lbp_m < thresholds[1]:
+                results[1] += 1
+
+            if dist_pca_e < thresholds[2]:
+                results[2] += 1
+
+            if dist_pca_m < thresholds[3]:
+                results[3] += 1
+
             avg_same.append((dist_lbp_e, dist_lbp_m, dist_pca_e, dist_pca_m))
-            if dist_lbp_e > thresholds[0]:
-                results[0] += 1
-
-            if dist_lbp_m > thresholds[1]:
-                results[1] += 1
-
-            if dist_pca_e > thresholds[2]:
-                results[2] += 1
-
-            if dist_pca_m > thresholds[3]:
-                results[3] += 1
-
         else:
-            avg_different.append((dist_lbp_e, dist_lbp_m, dist_pca_e, dist_pca_m))
-            if dist_lbp_e <= thresholds[0]:
+            if dist_lbp_e >= thresholds[0]:
                 results[0] += 1
 
-            if dist_lbp_m <= thresholds[1]:
+            if dist_lbp_m >= thresholds[1]:
                 results[1] += 1
 
-            if dist_pca_e <= thresholds[2]:
+            if dist_pca_e >= thresholds[2]:
                 results[2] += 1
 
-            if dist_pca_m <= thresholds[3]:
+            if dist_pca_m >= thresholds[3]:
                 results[3] += 1
+            avg_different.append((dist_lbp_e, dist_lbp_m, dist_pca_e, dist_pca_m))
 
 print('euclid LBP')
 print(np.average(avg_same[:][0]))
