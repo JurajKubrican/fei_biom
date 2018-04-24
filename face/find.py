@@ -4,6 +4,12 @@ import cv2
 import numpy as np
 import os
 from skimage import feature
+import pickle
+from sklearn.metrics.pairwise import euclidean_distances
+from sklearn import svm
+import math
+
+from sklearn.neural_network import MLPClassifier
 
 fileDir = '../cache/extract/face.zip/gt_db/'
 outDir = '../cache/marked/face.zip/gt_db/'
@@ -71,6 +77,7 @@ def alignFace(face, leftEye, rightEye):
 def doThePCA(dirFaces):
     testMatrix = None
     folders = os.listdir(dirFaces)
+    labels = []
     for folder in folders:
         faces = os.listdir(dirFaces + "/" + folder)
         print(dirFaces + folder)
@@ -86,8 +93,11 @@ def doThePCA(dirFaces):
             grayVector = gray.reshape(w * h)
             try:
                 testMatrix = np.vstack((testMatrix, grayVector))
+                labels.append(folder + "/" + face)
             except:
                 testMatrix = grayVector
+                print(len(grayVector))
+                labels.append(folder + "/" + face)
     print("Computing mean and Eigen vectors")
     mean, eigenVectors = cv2.PCACompute(testMatrix, mean=None, maxComponents=len(testMatrix))
 
@@ -95,12 +105,23 @@ def doThePCA(dirFaces):
     # cv2.imwrite(dirFaces+"/average.jpg", averageFace)
     print("Computing weights")
     all = cv2.PCAProject(testMatrix, mean, eigenVectors)
+    picklePCA(all, labels)
     return all
+
+
+def picklePCA(pca, labels):
+    all_pickle = {}
+    print("Pickling")
+    for i in range(0, int(len(labels) / 5)):
+        all_pickle[labels[i]] = pca[i]
+
+    pickle.dump(all_pickle, open('../cache/PCA.pickle', 'wb'))
 
 
 def doTheHOG(dirFaces):
     hog = cv2.HOGDescriptor((128, 128), (16, 16), (8, 8), (8, 8), 9)
     hog_histograms = []
+    labels = []
     folders = os.listdir(dirFaces)
     for folder in folders:
         faces = os.listdir(dirFaces + "/" + folder)
@@ -111,9 +132,27 @@ def doTheHOG(dirFaces):
                 print("¯\_(ツ)_/¯ Unable to load " + dirFaces + folder + "/" + face)
                 continue
             # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            labels.append(folder + "/" + face)
             histogram = hog.compute(img)
-            hog_histograms.append(histogram)
-    return hog_histograms
+            hog_histograms.append(np.asarray(histogram))
+    hog = []
+    for hist in hog_histograms:
+        tmp = []
+        for i in range(0, len(hist)):
+            print(hist[i][0])
+            tmp.append(hist[i][0])
+        hog.append(tmp)
+    pickleHOG(hog, labels)
+    return hog
+
+
+def pickleHOG(hog, labels):
+    all_pickle = {}
+    print("Pickling")
+    for i in range(0, int(len(labels) / 5)):
+        all_pickle[labels[i]] = hog[i]
+
+    pickle.dump(all_pickle, open('../cache/HOG.pickle', 'wb'))
 
 
 def doTheLPB(dirFaces):
@@ -156,6 +195,96 @@ def doTheBow(inData):
     return dictionary
 
 
+def calculateDistances(classifier):
+    alldata = pickle.load(open('../cache/' + classifier + '.pickle', 'rb'))
+    eOK = 0
+    mOK = 0
+    picNo = 1
+    all = 0
+    for pic1 in alldata:
+        print(str(picNo / len(alldata) * 100))
+        picNo += 1
+        for pic2 in alldata:
+            all += 1
+            data_1 = np.asarray(alldata[pic1])
+            data_2 = np.asarray(alldata[pic2])
+            euclid = math.sqrt(sum([(a - b) ** 2 for a, b in zip(data_1, data_2)]))
+            manhatan = np.sum(np.abs(data_1 - data_2))
+            if euclid < 10:
+                if pic1[:3] == pic2[:3]:
+                    eOK += 1
+            if manhatan < 500:
+                if pic1[:3] == pic2[:3]:
+                    mOK += 1
+
+    e = (eOK / all) * 100
+    m = (mOK / all) * 100
+
+    print(classifier + ' euclid: ' + str(e) + " %")
+    print(classifier + ' manhatan: ' + str(m) + " %")
+
+
+def doTheMLP(clasifier, numlayer):
+    alldata = pickle.load(open('../cache/' + clasifier + '.pickle', 'rb'))
+    cnt = 0
+    train_data = []
+    train_labels = []
+    test_data = []
+    test_labels = []
+
+    for picture in alldata:
+        if cnt is 15:
+            cnt = 0
+        if cnt < 10:
+            train_data.append(np.asarray(alldata[picture]))
+            train_labels.append(picture[:3])
+            cnt += 1
+        elif cnt < 15:
+            test_data.append(np.asarray(alldata[picture]))
+            test_labels.append(picture[:3])
+            cnt += 1
+
+    clf = MLPClassifier(alpha=1e-5, hidden_layer_sizes=(numlayer, numlayer, numlayer), random_state=1, max_iter=1000)
+    clf.fit(train_data, train_labels)
+    print("training done")
+    labels = clf.predict(test_data)
+    test_labels = np.asarray(test_labels)
+    correct = np.count_nonzero(labels == test_labels)
+    # print(labels)
+    # print(test_labels)
+    # for label in labels:
+    #     if label in test_labels:
+    #         correct+=1
+
+    print("MLP: "+str(((correct / len(labels)) * 100))+"%")
+
+def doTheSVM(classifier):
+    alldata = pickle.load(open('../cache/' + classifier + '.pickle', 'rb'))
+    cnt = 0
+    train_data = []
+    train_labels = []
+    test_data = []
+    test_labels = []
+
+    for picture in alldata:
+        if cnt is 15:
+            cnt = 0
+        if cnt < 10:
+            train_data.append(np.asarray(alldata[picture]))
+            train_labels.append(picture[:3])
+            cnt += 1
+        elif cnt < 15:
+            test_data.append(np.asarray(alldata[picture]))
+            test_labels.append(picture[:3])
+            cnt += 1
+    clf = svm.SVC(kernel='rbf')
+    clf.fit(train_data, train_labels)
+    print("training done")
+    labels = clf.predict(test_data)
+    test_labels = np.asarray(test_labels)
+    correct = np.count_nonzero(labels == test_labels)
+    print("SVM: " + str(((correct / len(labels)) * 100)) + "%")
+
 def main():
     # test = detectFace('../cache/extract/face.zip/gt_db/s01/02.jpg')
     # folders = os.listdir(fileDir)
@@ -175,12 +304,12 @@ def main():
     #
     # percent = (facesDetected*100)/totalPictures
     # print("Detected "+str(percent)+"% of faces")
-    # doThePCA(outDir)
-    hog = doTheHOG(outDir)
-    bow = doTheBow(hog)
-
-    print(bow)
-
+    # pca = doTheHOG(outDir)
+    # pca = doThePCA(outDir)
+    # calculateDistances("HOG")
+    # calculateDistances("PCA")
+    doTheMLP("HOG", 12)
+    doTheSVM("HOG")
 
 
 if __name__ == "__main__":
