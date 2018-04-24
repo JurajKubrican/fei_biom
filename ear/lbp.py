@@ -19,16 +19,19 @@ def lbpify(file):
     # processed, orig = preprocess(file)
 
     img_src = cv2.imread(file, 0)
+    img_src = cv2.equalizeHist(img_src, 0)
     shapesX = [
-        (0, 50),
-        (50, 100),
-        (10, 150),
-        (150, 200),
+        (0, 100),
+        (100, 200),
+        (200, 300),
+        (300, 400),
     ]
     shapesY = [
         (0, 50),
         (50, 100),
-        (10, 150),
+        (100, 150),
+        (150, 200),
+        (200, 250),
     ]
     numpoints = 9
     radius = 3
@@ -59,15 +62,18 @@ files = listdir(file_dir)
 
 detected = []
 lbp_source = []
-mean = np.zeros(200 * 150 * 3 * 128)
-size = (200, 150, 3)
-hists = {}
+mean = np.zeros(400 * 250 * 3 * 128)
+size = (400, 250, 3)
+output = {
+    'data': [],
+    'labels': []
+}
 
 for file in files:
     if (file == "explain2.txt"):
         continue
 
-    print(file)
-    hists[file] = lbpify(file_dir + file)
+    output["data"].append(lbpify(file_dir + file))
+    output["labels"].append(file[:2])
 
-pickle.dump(hists, open(dump_file, 'wb'))
+pickle.dump(output, open(dump_file, 'wb'))
