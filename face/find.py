@@ -244,7 +244,7 @@ def doTheMLP(clasifier, numlayer):
             test_labels.append(picture[:3])
             cnt += 1
 
-    clf = MLPClassifier(alpha=1e-5, hidden_layer_sizes=(numlayer, numlayer, numlayer), random_state=1, max_iter=1000)
+    clf = MLPClassifier(alpha=1e-5, hidden_layer_sizes=(numlayer, numlayer, numlayer), random_state=1, max_iter=300)
     clf.fit(train_data, train_labels)
     print("training done")
     labels = clf.predict(test_data)
@@ -256,7 +256,8 @@ def doTheMLP(clasifier, numlayer):
     #     if label in test_labels:
     #         correct+=1
 
-    print("MLP: "+str(((correct / len(labels)) * 100))+"%")
+    print(clasifier+" MLP: "+str(((correct / len(labels)) * 100))+"%")
+
 
 def doTheSVM(classifier):
     alldata = pickle.load(open('../cache/' + classifier + '.pickle', 'rb'))
@@ -277,13 +278,13 @@ def doTheSVM(classifier):
             test_data.append(np.asarray(alldata[picture]))
             test_labels.append(picture[:3])
             cnt += 1
-    clf = svm.SVC(kernel='rbf')
+    clf = svm.SVC(kernel='linear')
     clf.fit(train_data, train_labels)
     print("training done")
     labels = clf.predict(test_data)
     test_labels = np.asarray(test_labels)
     correct = np.count_nonzero(labels == test_labels)
-    print("SVM: " + str(((correct / len(labels)) * 100)) + "%")
+    print(classifier+" SVM: " + str(((correct / len(labels)) * 100)) + "%")
 
 def main():
     # test = detectFace('../cache/extract/face.zip/gt_db/s01/02.jpg')
@@ -308,7 +309,7 @@ def main():
     # pca = doThePCA(outDir)
     # calculateDistances("HOG")
     # calculateDistances("PCA")
-    doTheMLP("HOG", 12)
+    doTheMLP("HOG", 200)
     doTheSVM("HOG")
 
 
