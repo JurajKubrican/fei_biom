@@ -6,28 +6,32 @@ from skimage.feature import local_binary_pattern
 
 from matplotlib import pyplot as plt
 from os import listdir
+import pickle
 
-fileDir = '../cache/ellipse/ear.zip/'
-outDir = '../cache/lbp/'
-dumpFile = outDir + 'ear.pickle'
+file_dir: str = '../cache/ellipse/ear.zip/'
+out_dir: str = '../cache/'
+dump_file: str = out_dir + 'ear-lbp.pickle'
 
-Path(outDir).mkdir(parents=True, exist_ok=True)
+Path(out_dir).mkdir(parents=True, exist_ok=True)
 
 
 def lbpify(file):
     # processed, orig = preprocess(file)
 
     img_src = cv2.imread(file, 0)
+    img_src = cv2.equalizeHist(img_src, 0)
     shapesX = [
-        (0, 50),
-        (50, 100),
-        (10, 150),
-        (150, 200),
+        (0, 100),
+        (100, 200),
+        (200, 300),
+        (300, 400),
     ]
     shapesY = [
         (0, 50),
         (50, 100),
-        (10, 150),
+        (100, 150),
+        (150, 200),
+        (200, 250),
     ]
     numpoints = 9
     radius = 3
@@ -47,22 +51,29 @@ def lbpify(file):
             hist = hist.astype("float")
             hist /= (hist.sum() + eps)
             hists.append(hist)
-            plti += 1
-            plt.subplot(4, 3, plti)
-            plt.hist(transformed_img.flatten(), 256, [0, 10], color='r')
-    plt.show()
+    #         plti += 1
+    #         plt.subplot(4, 3, plti)
+    #         plt.hist(transformed_img.flatten(), 256, [0, 10], color='r')
+    # plt.show()
+    return hists
 
 
-files = listdir(fileDir)
+files = listdir(file_dir)
 
 detected = []
 lbp_source = []
-mean = np.zeros(200 * 150 * 3 * 128)
-size = (200, 150, 3)
-pca_source = []
-eigenvectors = []
+mean = np.zeros(400 * 250 * 3 * 128)
+size = (400, 250, 3)
+output = {
+    'data': [],
+    'labels': []
+}
+
 for file in files:
     if (file == "explain2.txt"):
         continue
 
-    im = lbpify(fileDir + file)
+    output["data"].append(lbpify(file_dir + file))
+    output["labels"].append(file[:2])
+
+pickle.dump(output, open(dump_file, 'wb'))

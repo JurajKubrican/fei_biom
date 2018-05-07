@@ -1,45 +1,48 @@
+import pickle
 from pathlib import Path
 
 import cv2
 import numpy as np
 from os import listdir
 
-fileDir = '../cache/ellipse/ear.zip/'
-outDir = '../cache/lbp/'
-dumpFile = outDir + 'ear.pickle'
+file_dir = '../cache/ellipse/ear.zip/'
+out_dir = '../cache/'
+dump_file = out_dir + 'ear-pca.pickle'
 
-Path(outDir).mkdir(parents=True, exist_ok=True)
+Path(out_dir).mkdir(parents=True, exist_ok=True)
 
+files = listdir(file_dir)
 
-def preprocess(file):
-    img = cv2.imread(file,0)
-    return img
-
-
-files = listdir(fileDir)
-
-detected = []
-lbp_source = []
-mean = np.zeros(200 * 150 * 128)
-size = (200, 150)
+size = (400, 250)
 pca_source = []
-eigenvectors = []
+labels = []
 for file in files:
-    if (file == "explain2.txt"):
+    if file == "explain2.txt":
         continue
-
-    im = preprocess(fileDir + file)
+    labels.append(file)
+    im = cv2.imread(file_dir + file, 0)
+    im = cv2.equalizeHist(im, 0)
     shape = im.shape
     pca_source.append(im.flatten())
 
-# pca_source = np.transpose(pca_source)
+pca_source = np.asarray(pca_source)
+mean, eigvec = cv2.PCACompute(pca_source, mean=None)
+mean = np.asarray(mean)
+average = np.asarray(mean.reshape(size), 'uint8')
+eigvec = np.asarray(eigvec)
+vec = cv2.PCAProject(pca_source, mean, eigvec)
+vec = [x[:64] for x in vec]
 
-print('counting pca')
-mean, eigvec = cv2.PCACompute(np.asarray(pca_source), mean=None)
-print('done')
+output = {
+    'data': [],
+    'labels': []
+}
 
-average = mean.reshape(size)
+for i in range(len(labels)):
+    output["data"].append(vec[i])
+    output["labels"].append(labels[i][:2])
 
-first = eigvec[0].reshape(size)
-cv2.imshow("/average.jpg", average + first)
-cv2.waitKey()
+pickle.dump(output, open(dump_file, 'wb'))
+
+
+# ToDo PCA to 64 prinzakov

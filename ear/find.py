@@ -6,13 +6,13 @@ import pickle as p
 
 from os import listdir
 
-fileDir = '../cache/extract/ear.zip/ucho/'
-outDir = '../cache/marked/ear.zip/'
+file_dir = '../cache/extract/ear.zip/ucho/'
+out_dir = '../cache/marked/ear.zip/'
 classifier = '../cascades/haarcascade_mcs_leftear.xml'
 
 margin = 30
 
-Path(outDir).mkdir(parents=True, exist_ok=True)
+Path(out_dir).mkdir(parents=True, exist_ok=True)
 
 
 def detect(file):
@@ -21,7 +21,7 @@ def detect(file):
     if left_ear_cascade.empty():
         raise IOError('classifier xml not found :/')
 
-    img = cv2.imread(fileDir + file)
+    img = cv2.imread(file_dir + file)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     # clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
@@ -70,7 +70,7 @@ def detect(file):
         left_ear = left_ear_cascade.detectMultiScale(gray, 1.15, 5)
 
     if not len(left_ear):
-        cv2.imwrite(outDir + file, grayOrig)
+        cv2.imwrite(out_dir + file, grayOrig)
         return ((), ())
 
     bestX = 0
@@ -91,11 +91,11 @@ def detect(file):
     cv2.rectangle(gray, (bestX - margin, bestY - margin), (bestX + maxW + 2 * margin, bestY + maxH + 2 * margin),
                   (0, 255, 0), 3)
 
-    cv2.imwrite(outDir + file, gray)
+    cv2.imwrite(out_dir + file, gray)
     return left_ear, rect
 
 
-files = listdir(fileDir)
+files = listdir(file_dir)
 
 detected = []
 rects = dict()
@@ -109,7 +109,7 @@ for file in files:
     if rect.__len__():
         rects[file] = rect
 
-p.dump(rects, open(outDir + 'rects.pickle', "wb"))
+p.dump(rects, open(out_dir + 'rects.pickle', "wb"))
 
 print('uspesnost: ' + str(detected.__len__() / files.__len__()))
 print('in: ' + str(files.__len__()))
