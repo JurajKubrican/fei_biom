@@ -39,7 +39,7 @@ def lbpify(img_src):
     for i in range(4):
         for j in range(3):
             img = img_src[shapesX[i][0]:shapesX[i][1], shapesY[j][0]:shapesY[j][1]]
-            if img.shape != (50, 100):
+            if img.shape != (100, 50):
                 continue
             transformed_img = local_binary_pattern(img, numpoints,
                                                    radius, method="uniform")
