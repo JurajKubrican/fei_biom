@@ -13,7 +13,7 @@ Path(out_dir).mkdir(parents=True, exist_ok=True)
 
 files = listdir(file_dir)
 
-size = (400, 250)
+size = (0, 0)
 pca_source = []
 labels = []
 for file in files:
@@ -22,7 +22,7 @@ for file in files:
     labels.append(file)
     im = cv2.imread(file_dir + file, 0)
     im = cv2.equalizeHist(im, 0)
-    shape = im.shape
+    size = im.shape
     pca_source.append(im.flatten())
 
 pca_source = np.asarray(pca_source)
@@ -33,16 +33,14 @@ eigvec = np.asarray(eigvec)
 vec = cv2.PCAProject(pca_source, mean, eigvec)
 vec = [x[:64] for x in vec]
 
-output = {
-    'data': [],
-    'labels': []
-}
-
+temp = dict()
 for i in range(len(labels)):
-    output["data"].append(vec[i])
-    output["labels"].append(labels[i][:2])
+    label = labels[i][:2]
+    temp.setdefault(label, []).append(vec[i])
+
+output = dict()
+for label in temp:
+    if len(temp[label]) == 4:
+        output[label] = temp[label]
 
 pickle.dump(output, open(dump_file, 'wb'))
-
-
-# ToDo PCA to 64 prinzakov
