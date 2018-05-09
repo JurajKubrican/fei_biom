@@ -81,30 +81,32 @@ def print_img(title, img):
 #     return distance.hamming(img1, img2)
 
 def hammingation(images, masks):
-    print("wake up hammingation")
+    print("wake up hamm`ingation")
     persons = set()
+    pocc = 0
     for img in images:
         persons.add(img.split('\\')[1].split('_')[0])
     persons = sorted(persons)
     print(persons)
     data = []
     print("start processing")
-    poc = 0;
+    poc = 0
     val =0
     print(len(images))
     for x in range(0, len(images)):
         gabor1 = cv2.imread(images[x], 0)
         mask1 = cv2.imread(masks[x], 0)
+        # print("len images je ", len(images))
         for y in range(0, len(images)):
             if x == y:
-                continue;
+                continue
             gabor2 = cv2.imread(images[y], 0)
             mask2 = cv2.imread(images[y], 0)
             # mask2 = cv2.cvtColor(mask2, cv2.COLOR_BGR2GRAY)
             a = gabor1 * mask1 * mask2
             b = gabor2 * mask1 * mask2
             val = []
-            poc = 0;
+            poc = 0
             for i in range(-10, 10):
                 # print("processing "+ images[x].split('\\')[1].split('_')[0] + " with " + images[y].split('\\')[1].split('_')[0])
                 b2 = np.roll(b, i, axis=1)
@@ -114,6 +116,7 @@ def hammingation(images, masks):
 
                 val.append(score)
 
+            pocc += 1
             data.append(
                 {
                     'person': images[x].split('\\')[1].split('_')[0],
@@ -125,7 +128,11 @@ def hammingation(images, masks):
     different = []
     print("end processing")
     print("start ploting")
-    nulove = 0;
+    nulove = 0
+    print("ludia ",persons)
+    print("data", pocc)
+    # print("vsetky", len(persons)*len(data))
+
     for person in persons:
         # print(person)
         for item in data:
@@ -145,7 +152,8 @@ def hammingation(images, masks):
     # print(same)
     plt.title('Hamming Distance')
     plt.hist(different, bins='auto', label='Different')
-    # plt.hist(same,  bins=30, color='y', alpha=0.3, label='Same')
+    print('tie iste ', len(same))
+    plt.hist(same,  bins=30, color='y', alpha=0.3, label='Same')
     plt.show()
 
 path_binar = "C:/Users/Erik/PycharmProjects/fei_biom/iris/binarize"
