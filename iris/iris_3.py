@@ -118,33 +118,6 @@ def gaboralization(path):
     for path_img in path:
 
         img = cv2.imread(path_img, 0)
-        # print(path_img.split('\\')[3])
-        # cv2.imshow('img', img)
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
-
-        # g_kernel = cv2.getGaborKernel((21, 21), 8.0, np.pi / 4, 10.0, 0.5, 0, ktype=cv2.CV_32F)
-        #
-        # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        # filtered_img = cv2.filter2D(img, cv2.CV_8UC3, g_kernel)
-        #
-        # cv2.imshow('image', img)
-        # cv2.imshow('filtered image', filtered_img)
-        #
-        # h, w = g_kernel.shape[:2]
-        # g_kernel = cv2.resize(g_kernel, (3 * w, 3 * h), interpolation=cv2.INTER_CUBIC)
-        # cv2.imshow('gabor kernel (resized)', g_kernel)
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
-
-
-
-
-        # cv2.imshow("Mask", img)
-        # cv2.waitKey()
-
-        # cv2.imshow("Input image", img)
-        # cv2.waitKey()
 
         img = cv2.equalizeHist(img)
         kern_s = 21
