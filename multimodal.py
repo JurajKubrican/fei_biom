@@ -1,5 +1,6 @@
 from ear.classify import classify as classify_ear
-from face.find import normalize as classify_face
+from face.find import normalize as classify_ear
+from iris.iris_5 import classify as classify_iris
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,15 +11,23 @@ def tp_fp(thresh):
     tn = 0
     fp = 0
     fn = 0
-    z_same = []
-    z_diff = []
+    z_same = {
+        'ear': [],
+        'face': [],
+        'iris': [],
+    }
+    z_diff = {
+        'ear': [],
+        'face': [],
+        'iris': [],
+    }
     for i in range(10 * 4):
         for j in range(10 * 4):
             if i == j:
                 continue
-
-            # z_ear, same = classify_ear(i, j)
-            z_face, same = classify_face(i, j)
+            z_ear, same = classify_ear(i, j)
+            z_face, _ = classify_ear(i, j)
+            z_iris, _ = classify_iris(i, j)
 
             # z = np.mean([z_ear, z_face])
             z = z_face
@@ -41,7 +50,7 @@ def tp_fp(thresh):
 
 all_tpr = []
 all_fpr = []
-for thresh in range(-150, 250, 1):
+for thresh in range(-15, 25, 1):
     tpr, fpr = tp_fp(thresh)
     all_tpr.append(tpr)
     all_fpr.append(fpr)

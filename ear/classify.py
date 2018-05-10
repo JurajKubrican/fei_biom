@@ -89,13 +89,13 @@ def roc():
     return all_fpr, all_tpr
 
 
-all_fpr, all_tpr = roc()
-
-plt.plot(all_fpr, all_tpr, '-')
-plt.plot([0, 1], [0, 1], '-')
-
-plt.xlabel('True positive rate (Sensitivity)')
-plt.ylabel('False positive rate (Specificity)')
-plt.title('ROC')
-plt.grid(True)
-plt.show()
+# all_fpr, all_tpr = roc()
+#
+# plt.plot(all_fpr, all_tpr, '-')
+# plt.plot([0, 1], [0, 1], '-')
+#
+# plt.xlabel('True positive rate (Sensitivity)')
+# plt.ylabel('False positive rate (Specificity)')
+# plt.title('ROC')
+# plt.grid(True)
+# plt.show()

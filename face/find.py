@@ -328,7 +328,7 @@ def doSomething(classifier):
 
 
 def normalize(pic1, pic2):
-    alldata = pickle.load(open('../cache/PCA.pickle', 'rb'))
+    alldata = pickle.load(open(os.path.dirname(os.path.abspath(__file__)) + '/../cache/PCA.pickle', 'rb'))
     train_data = []
     train_labels = []
     test_data = []
@@ -401,7 +401,3 @@ def main():
     print("Mean diff: " + str(mean_diff))
 
     print("Tresh: " + str(np.median([mean_same, mean_diff])))
-
-
-if __name__ == "__main__":
-    main()
