@@ -327,7 +327,7 @@ def doSomething(classifier):
     print('Var: ' + str(np.var(distances)))
 
 
-def normalize(pic1, pic2):
+def normalize(pic1, pic2, tresh):
     alldata = pickle.load(open('../cache/PCA.pickle', 'rb'))
     train_data = []
     train_labels = []
@@ -349,7 +349,9 @@ def normalize(pic1, pic2):
             cnt += 1
 
     s = math.sqrt(np.sum(np.abs(train_data[pic1] - train_data[pic2])))
-    return (((s - mean) / variance) * -10000000)-11770, train_labels[pic1] == train_labels[pic2]
+    z = (((s - mean) / variance) * -10000000) - 11770
+
+    return z, z > tresh, train_labels[pic1] == train_labels[pic2]
 
 
 def main():
@@ -380,13 +382,14 @@ def main():
     # doSomething("PCA")
     same = []
     diff = []
+    tresh = 3.9208930067931194
     for i in range(40):
         for j in range(40):
             if i is j:
                 continue
             if j % 10 is 0:
                 print("i:" + str(i) + ' j:' + str(j))
-            z, is_same = normalize(i, j)
+            z, is_same = normalize(i, j, tresh)
             if is_same:
                 same.append(z)
             else:
@@ -396,6 +399,8 @@ def main():
 
     print("Mean same: " + str(mean_same))
     print("Mean diff: " + str(mean_diff))
+
+    print("Tresh: " + str(np.median([mean_same, mean_diff])))
 
 
 if __name__ == "__main__":
