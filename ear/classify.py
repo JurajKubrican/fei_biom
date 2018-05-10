@@ -1,10 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+import cv2
 
 import pickle
 
-file_dir = '../cache/ellipse/ear.zip/'
-out_dir = '../cache/'
+file_dir = os.path.dirname(os.path.abspath(__file__)) + '/../cache/ellipse/ear.zip/'
+pickle_dir = os.path.dirname(os.path.abspath(__file__)) + '/../cache/'
 
 # test_index = 3
 feature_type = 'pca'
@@ -12,7 +14,7 @@ dist_type = 'm'
 
 global_avg = 120313.0
 global_var = 4.85388e+08
-global_z_thresh = 20.1877479975
+global_z_thresh = 2.01877479975
 
 
 def distance(data_1, data_2, dist="m"):
@@ -22,29 +24,8 @@ def distance(data_1, data_2, dist="m"):
         return np.sqrt(np.sum((data_1 - data_2) ** 2))
 
 
-# def find_closest(target_label, data, d="m"):
-#     test_data = data[target_label][test_index]
-#
-#     results = []
-#     min_val = float("inf")
-#     min_label = ''
-#     for label in data:
-#         for i in range(4):
-#             if i == test_index:
-#                 continue
-#             dist = distance(test_data, data[label][i])
-#             results.append(dist)
-#             if dist < min_val:
-#                 min_val = dist
-#                 min_label = label
-#
-#     z = ((min_val - np.mean(results)) / np.var(results)) * -10000
-#
-#     return min_label, z
-
-
-def classify(index_1, index_2, thresh):
-    data = pickle.load(open(out_dir + 'ear-' + feature_type + '.pickle', 'rb'))
+def classify(index_1, index_2):
+    data = pickle.load(open(pickle_dir + 'ear-' + feature_type + '.pickle', 'rb'))
     label_1 = list(data.keys())[int(index_1 / 4)]
     label_2 = list(data.keys())[int(index_2 / 4)]
     i_1 = index_1 % 4
@@ -55,14 +36,14 @@ def classify(index_1, index_2, thresh):
 
     dist = distance(data_1, data_2)
 
-    z = ((dist - global_avg) / global_var) * -1000000
+    z = ((dist - global_avg) / global_var) * -100000
 
-    return z, z > thresh, label_1 == label_2
+    return z, label_1 == label_2
 
 
 # print(classify('01'))
 
-def test(thresh):
+def tp_fp(thresh):
     tp = 0
     tn = 0
     fp = 0
@@ -74,7 +55,8 @@ def test(thresh):
             if i == j:
                 continue
 
-            z, predict, same = classify(i, j, thresh)
+            z, same = classify(i, j)
+            predict = z > thresh
             if same:
                 z_same.append(z)
                 if predict:
@@ -97,19 +79,30 @@ def test(thresh):
     return tp / (tp + fn), 1 - (tn / (fp + tn))
 
 
-all_tpr = []
-all_fpr = []
-for thresh in range(-150, 250, 25):
-    tpr, fpr = test(thresh)
-    all_tpr.append(tpr)
-    all_fpr.append(fpr)
-    print('thresh', thresh)
+def roc():
+    all_tpr = []
+    all_fpr = []
+    for thresh in range(-15, 25, 1):
+        tpr, fpr = tp_fp(thresh)
+        all_tpr.append(tpr)
+        all_fpr.append(fpr)
+        print('thresh', thresh)
+    return all_fpr, all_tpr
 
-plt.plot(all_fpr, all_tpr, '-')
-plt.plot([0, 1], [0, 1], '-')
 
-plt.xlabel('True positive rate (Sensitivity)')
-plt.ylabel('False positive rate (Specificity)')
-plt.title('ROC')
-plt.grid(True)
-plt.show()
+def show(i):
+    files = os.listdir(file_dir)
+    img = cv2.imread(file_dir + files[i])
+    cv2.imshow('im' + str(i), img)
+    cv2.waitKey()
+
+# all_fpr, all_tpr = roc()
+#
+# plt.plot(all_fpr, all_tpr, '-')
+# plt.plot([0, 1], [0, 1], '-')
+#
+# plt.xlabel('True positive rate (Sensitivity)')
+# plt.ylabel('False positive rate (Specificity)')
+# plt.title('ROC')
+# plt.grid(True)
+# plt.show()

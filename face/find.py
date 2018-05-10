@@ -11,8 +11,8 @@ import math
 
 from sklearn.neural_network import MLPClassifier
 
-fileDir = '../cache/extract/face.zip/gt_db/'
-outDir = '../cache/marked/face.zip/gt_db/'
+fileDir = os.path.dirname(os.path.abspath(__file__)) + '/../cache/extract/face.zip/gt_db/'
+outDir = os.path.dirname(os.path.abspath(__file__)) + '/../cache/marked/face.zip/gt_db/'
 
 Path(outDir).mkdir(parents=True, exist_ok=True)
 
@@ -327,8 +327,8 @@ def doSomething(classifier):
     print('Var: ' + str(np.var(distances)))
 
 
-def normalize(pic1, pic2, tresh):
-    alldata = pickle.load(open('../cache/PCA.pickle', 'rb'))
+def normalize(pic1, pic2):
+    alldata = pickle.load(open(os.path.dirname(os.path.abspath(__file__)) + '/../cache/PCA.pickle', 'rb'))
     train_data = []
     train_labels = []
     test_data = []
@@ -351,57 +351,78 @@ def normalize(pic1, pic2, tresh):
     s = math.sqrt(np.sum(np.abs(train_data[pic1] - train_data[pic2])))
     z = (((s - mean) / variance) * -10000000) - 11770
 
-    return z, z > tresh, train_labels[pic1] == train_labels[pic2]
+    return z, train_labels[pic1] == train_labels[pic2]
 
 
-def main():
-    # test = detectFace('../cache/extract/face.zip/gt_db/s01/02.jpg')
-    # folders = os.listdir(fileDir)
-    # totalPictures = 0
-    # facesDetected = 0
-    # for folder in folders:
-    #     pictures = os.listdir(fileDir + folder)
-    #     if not (os.path.exists(outDir + folder)):
-    #         os.mkdir(outDir + folder)
-    #     print(fileDir + folder)
-    #     for picture in pictures:
-    #         face = detectFace(fileDir + folder + '/' + picture)
-    #         totalPictures += 1
-    #         if not (face is None):
-    #             cv2.imwrite(outDir + '/' + folder + '/' + picture, face)
-    #             facesDetected += 1
-    #
-    # percent = (facesDetected*100)/totalPictures
-    # print("Detected "+str(percent)+"% of faces")
-    # pca = doTheHOG(outDir)
-    # pca = doThePCA(outDir)
-    # calculateDistances("HOG")
-    # calculateDistances("PCA")
-    # doTheMLP("HOG", 200)
-    # doTheSVM("HOG")
-    # doSomething("PCA")
-    same = []
-    diff = []
-    tresh = 3.9208930067931194
-    for i in range(40):
-        for j in range(40):
-            if i is j:
-                continue
-            if j % 10 is 0:
-                print("i:" + str(i) + ' j:' + str(j))
-            z, is_same = normalize(i, j, tresh)
-            if is_same:
-                same.append(z)
-            else:
-                diff.append(z)
-    mean_same = np.mean(same)
-    mean_diff = np.mean(diff)
+def show_face(index):
+    alldata = pickle.load(open(os.path.dirname(os.path.abspath(__file__)) + '/../cache/PCA.pickle', 'rb'))
+    train_data = []
+    train_labels = []
+    cnt = 0
+    for picture in alldata:
+        if cnt is 15:
+            cnt = 0
+        if cnt < 4:
+            train_data.append(np.asarray(alldata[picture]))
+            train_labels.append(picture)
+            cnt += 1
+        elif cnt < 15:
+            cnt += 1
 
-    print("Mean same: " + str(mean_same))
-    print("Mean diff: " + str(mean_diff))
+    img = cv2.imread(outDir + train_labels[index], 0)
+    cv2.imshow('Window', img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
-    print("Tresh: " + str(np.median([mean_same, mean_diff])))
+# def main():
+# test = detectFace('../cache/extract/face.zip/gt_db/s01/02.jpg')
+# folders = os.listdir(fileDir)
+# totalPictures = 0
+# facesDetected = 0
+# for folder in folders:
+#     pictures = os.listdir(fileDir + folder)
+#     if not (os.path.exists(outDir + folder)):
+#         os.mkdir(outDir + folder)
+#     print(fileDir + folder)
+#     for picture in pictures:
+#         face = detectFace(fileDir + folder + '/' + picture)
+#         totalPictures += 1
+#         if not (face is None):
+#             cv2.imwrite(outDir + '/' + folder + '/' + picture, face)
+#             facesDetected += 1
+#
+# percent = (facesDetected*100)/totalPictures
+# print("Detected "+str(percent)+"% of faces")
+# pca = doTheHOG(outDir)
+# pca = doThePCA(outDir)
+# calculateDistances("HOG")
+# calculateDistances("PCA")
+# doTheMLP("HOG", 200)
+# doTheSVM("HOG")
+# doSomething("PCA")
+# same = []
+# diff = []
+# tresh = 3.9208930067931194
+# for i in range(40):
+#     for j in range(40):
+#         if i is j:
+#             continue
+#         if j % 10 is 0:
+#             print("i:" + str(i) + ' j:' + str(j))
+#         z, is_same = normalize(i, j)
+#         if is_same:
+#             same.append(z)
+#         else:
+#             diff.append(z)
+# mean_same = np.mean(same)
+# mean_diff = np.mean(diff)
+#
+# print("Mean same: " + str(mean_same))
+# print("Mean diff: " + str(mean_diff))
+#
+# print("Tresh: " + str(np.median([mean_same, mean_diff])))
+# show_face(3)
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
