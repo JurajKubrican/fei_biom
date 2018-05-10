@@ -11,8 +11,8 @@ import math
 
 from sklearn.neural_network import MLPClassifier
 
-fileDir = '../cache/extract/face.zip/gt_db/'
-outDir = '../cache/marked/face.zip/gt_db/'
+fileDir = os.path.dirname(os.path.abspath(__file__)) + '/../cache/extract/face.zip/gt_db/'
+outDir = os.path.dirname(os.path.abspath(__file__)) + '/../cache/marked/face.zip/gt_db/'
 
 Path(outDir).mkdir(parents=True, exist_ok=True)
 
@@ -369,60 +369,59 @@ def show_face(index):
         elif cnt < 15:
             cnt += 1
 
-    img = cv2.imread(outDir + train_labels[index],0)
+    img = cv2.imread(outDir + train_labels[index], 0)
     cv2.imshow('Window', img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-
 # def main():
-    # test = detectFace('../cache/extract/face.zip/gt_db/s01/02.jpg')
-    # folders = os.listdir(fileDir)
-    # totalPictures = 0
-    # facesDetected = 0
-    # for folder in folders:
-    #     pictures = os.listdir(fileDir + folder)
-    #     if not (os.path.exists(outDir + folder)):
-    #         os.mkdir(outDir + folder)
-    #     print(fileDir + folder)
-    #     for picture in pictures:
-    #         face = detectFace(fileDir + folder + '/' + picture)
-    #         totalPictures += 1
-    #         if not (face is None):
-    #             cv2.imwrite(outDir + '/' + folder + '/' + picture, face)
-    #             facesDetected += 1
-    #
-    # percent = (facesDetected*100)/totalPictures
-    # print("Detected "+str(percent)+"% of faces")
-    # pca = doTheHOG(outDir)
-    # pca = doThePCA(outDir)
-    # calculateDistances("HOG")
-    # calculateDistances("PCA")
-    # doTheMLP("HOG", 200)
-    # doTheSVM("HOG")
-    # doSomething("PCA")
-    # same = []
-    # diff = []
-    # tresh = 3.9208930067931194
-    # for i in range(40):
-    #     for j in range(40):
-    #         if i is j:
-    #             continue
-    #         if j % 10 is 0:
-    #             print("i:" + str(i) + ' j:' + str(j))
-    #         z, is_same = normalize(i, j)
-    #         if is_same:
-    #             same.append(z)
-    #         else:
-    #             diff.append(z)
-    # mean_same = np.mean(same)
-    # mean_diff = np.mean(diff)
-    #
-    # print("Mean same: " + str(mean_same))
-    # print("Mean diff: " + str(mean_diff))
-    #
-    # print("Tresh: " + str(np.median([mean_same, mean_diff])))
-    # show_face(3)
+# test = detectFace('../cache/extract/face.zip/gt_db/s01/02.jpg')
+# folders = os.listdir(fileDir)
+# totalPictures = 0
+# facesDetected = 0
+# for folder in folders:
+#     pictures = os.listdir(fileDir + folder)
+#     if not (os.path.exists(outDir + folder)):
+#         os.mkdir(outDir + folder)
+#     print(fileDir + folder)
+#     for picture in pictures:
+#         face = detectFace(fileDir + folder + '/' + picture)
+#         totalPictures += 1
+#         if not (face is None):
+#             cv2.imwrite(outDir + '/' + folder + '/' + picture, face)
+#             facesDetected += 1
+#
+# percent = (facesDetected*100)/totalPictures
+# print("Detected "+str(percent)+"% of faces")
+# pca = doTheHOG(outDir)
+# pca = doThePCA(outDir)
+# calculateDistances("HOG")
+# calculateDistances("PCA")
+# doTheMLP("HOG", 200)
+# doTheSVM("HOG")
+# doSomething("PCA")
+# same = []
+# diff = []
+# tresh = 3.9208930067931194
+# for i in range(40):
+#     for j in range(40):
+#         if i is j:
+#             continue
+#         if j % 10 is 0:
+#             print("i:" + str(i) + ' j:' + str(j))
+#         z, is_same = normalize(i, j)
+#         if is_same:
+#             same.append(z)
+#         else:
+#             diff.append(z)
+# mean_same = np.mean(same)
+# mean_diff = np.mean(diff)
+#
+# print("Mean same: " + str(mean_same))
+# print("Mean diff: " + str(mean_diff))
+#
+# print("Tresh: " + str(np.median([mean_same, mean_diff])))
+# show_face(3)
 
 
 # if __name__ == "__main__":

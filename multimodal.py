@@ -3,10 +3,14 @@ from ear.classify import show as show_ear
 from face.find import normalize as classify_face
 from face.find import show_face as show_face
 from iris.iris_5 import classify as classify_iris
+from iris.iris_5 import print_img as show_iris
 
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
+
+glob_thresh = 2.0
+glob_range = range(-15, 25, 1)
 
 
 def tp_fp_helper(stats, thresh, same, z):
@@ -81,19 +85,19 @@ def tp_fp(thresh):
                'all': np.mean(z_diff['all']),
            }, {
                'ear': {'tpr': stats['ear']['tp'] / (stats['ear']['tp'] + stats['ear']['fn']),
-                       'fpr': 1 - (stats['ear']['tn'] / (stats['ear']['fp'] + stats['ear']['tn']))},
+                       'fpr': (stats['ear']['tn'] / (stats['ear']['fp'] + stats['ear']['tn']))},
                'face': {'tpr': stats['face']['tp'] / (stats['face']['tp'] + stats['face']['fn']),
-                        'fpr': 1 - (stats['face']['tn'] / (stats['face']['fp'] + stats['face']['tn']))},
+                        'fpr': (stats['face']['tn'] / (stats['face']['fp'] + stats['face']['tn']))},
                'iris': {'tpr': stats['iris']['tp'] / (stats['iris']['tp'] + stats['iris']['fn']),
-                        'fpr': 1 - (stats['iris']['tn'] / (stats['iris']['fp'] + stats['iris']['tn']))},
+                        'fpr': (stats['iris']['tn'] / (stats['iris']['fp'] + stats['iris']['tn']))},
                'all': {'tpr': stats['all']['tp'] / (stats['all']['tp'] + stats['all']['fn']),
-                       'fpr': 1 - (stats['all']['tn'] / (stats['all']['fp'] + stats['all']['tn']))},
+                       'fpr': (stats['all']['tn'] / (stats['all']['fp'] + stats['all']['tn']))},
            }
 
 
 def show_roc():
     stats_all = []
-    for thresh in range(-15, 25, 1):
+    for thresh in glob_range:
         print('thresh', thresh)
         z_same, z_diff, stats = tp_fp(thresh)
         print(z_same, z_diff)
@@ -119,25 +123,64 @@ def show_roc():
         all_tpr['iris'].append(item['iris']['tpr'])
         all_tpr['all'].append(item['all']['tpr'])
 
-blue_patch = mpatches.Patch(color='blue', label='Iris')
-red_patch = mpatches.Patch(color='red', label='Ear')
-green_patch = mpatches.Patch(color='green', label='Face')
-yellow_patch = mpatches.Patch(color='yellow', label='All')
-plt.plot(all_fpr['iris'], all_tpr['iris'], '-b')
-plt.plot(all_fpr['ear'], all_tpr['ear'], '-r')
-plt.plot(all_fpr['face'], all_tpr['face'], '-g')
-plt.plot(all_fpr['all'], all_tpr['all'], '-y')
-plt.plot([0, 1], [0, 1], '-')
+    blue_patch = mpatches.Patch(color='blue', label='Iris')
+    red_patch = mpatches.Patch(color='red', label='Ear')
+    green_patch = mpatches.Patch(color='green', label='Face')
+    yellow_patch = mpatches.Patch(color='yellow', label='All')
 
-plt.xlabel('True positive rate (Sensitivity)')
-plt.ylabel('False positive rate (Specificity)')
-plt.title('ROC')
-plt.legend(handles=[red_patch, blue_patch, green_patch, yellow_patch])
-plt.grid(True)
-plt.show()
+    plt.plot([1 - x for x in all_fpr['iris']], all_tpr['iris'], '-b')
+    plt.plot([1 - x for x in all_fpr['ear']], all_tpr['ear'], '-r')
+    plt.plot([1 - x for x in all_fpr['face']], all_tpr['face'], '-g')
+    plt.plot([1 - x for x in all_fpr['all']], all_tpr['all'], '-y')
+    plt.plot([0, 1], [0, 1], '-')
+    plt.xlabel('False positive rate (Specificity)')
+    plt.ylabel('True positive rate (Sensitivity)')
+    plt.title('ROC')
+    plt.legend(handles=[red_patch, blue_patch, green_patch, yellow_patch])
+    plt.grid(True)
+    plt.show(1)
+
+    red_patch = mpatches.Patch(color='red', label='Fpr')
+    green_patch = mpatches.Patch(color='green', label='Tpr')
+
+    plt.xlabel('Threshold')
+    plt.ylabel('Tpr, Fpr')
+    plt.plot(glob_range, all_tpr['iris'], '-g')
+    plt.plot(glob_range, all_fpr['iris'], '-r')
+    plt.title('TPR FPR Iris')
+    plt.legend(handles=[red_patch, green_patch])
+    plt.grid(True)
+    plt.show(2)
+
+    plt.xlabel('Threshold')
+    plt.ylabel('Tpr, Fpr Ear')
+    plt.plot(glob_range, all_tpr['ear'], '-g')
+    plt.plot(glob_range, all_fpr['ear'], '-r')
+    plt.title('TPR FPR')
+    plt.legend(handles=[red_patch, green_patch])
+    plt.grid(True)
+    plt.show(3)
+
+    plt.xlabel('Threshold')
+    plt.ylabel('Tpr, Fpr Face')
+    plt.plot(glob_range, all_tpr['face'], '-g')
+    plt.plot(glob_range, all_fpr['face'], '-r')
+    plt.title('TPR FPR')
+    plt.legend(handles=[red_patch, green_patch])
+    plt.grid(True)
+    plt.show(4)
+
+    plt.xlabel('Threshold')
+    plt.ylabel('Tpr, Fpr All')
+    plt.plot(glob_range, all_tpr['all'], '-g')
+    plt.plot(glob_range, all_fpr['all'], '-r')
+    plt.title('ROC')
+    plt.legend(handles=[red_patch, green_patch])
+    plt.grid(True)
+    plt.show(5)
 
 
-# show_roc()
+show_roc()
 
 
 def compare(x, y):
@@ -146,12 +189,15 @@ def compare(x, y):
     # z_iris, _ = classify_iris(i, j)
     z_iris = 0
     z = np.mean([z_ear, z_face, z_iris])
+
+    print(glob_thresh > z)
+
     show_ear(x)
     show_ear(y)
     show_face(x)
     show_face(y)
+    show_iris(x, y)
 
     return 0
 
-
-compare(1, 10)
+# compare(1, 10)

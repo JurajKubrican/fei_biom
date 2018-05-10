@@ -21,7 +21,7 @@ def load_images(path):
     return images
 
 
-def print_img(images, imgx, imgy):
+def print_img( imgx, imgy):
     simg = cv2.imread(imgx, 0)
     timg = cv2.imread(imgy, 0)
     cv2.imshow(imgx.split('/')[6], simg)
@@ -135,3 +135,5 @@ def classify(ximg, yimg):
     # array_of_z = test_all_iris(images,
     #                            masks)  # vytvori pole vsetkych z hodnot s tym ze index hodnoty v poli je index obrazkov x*y++ (1*2,1*3,1*4... #rovnake indexy preskakuje
 # print_img(images,ximg,yimg)
+
+
