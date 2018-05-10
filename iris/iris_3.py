@@ -76,14 +76,14 @@ def frange(start, stop, step):
 
 
 def build_kern(kSize):
-        kern = cv2.getGaborKernel((kSize, kSize), 5.0, 0, 8.0, 1, 1.7, ktype=cv2.CV_32F)                #sigma - Gaussian standard deviation.
+        kern = cv2.getGaborKernel((kSize, kSize), 5.0, 0.2, 10.0, 1, 1.7, ktype=cv2.CV_32F)                #sigma - Gaussian standard deviation.
         kern /= 1.5 * kern.sum()
 
         return kern
 
 
 def build_kern2(kSize):
-        kern = cv2.getGaborKernel((kSize, kSize), 5.0, 0, 8.0, 1, -1.7, ktype=cv2.CV_32F)
+        kern = cv2.getGaborKernel((kSize, kSize), 5.0, 0.2, 10.0, 1, -1.7, ktype=cv2.CV_32F)
         kern /= 1.5 * kern.sum()
 
         return kern
@@ -147,9 +147,9 @@ def gaboralization(path):
         # cv2.waitKey()
 
         img = cv2.equalizeHist(img)
-
-        kernel = build_kern(5)
-        kernel2 = build_kern2(5)
+        kern_s = 21
+        kernel = build_kern(kern_s)
+        kernel2 = build_kern2(kern_s)
 
         img = to2D(img, kernel)
         unwrapped2 = to2D(img, kernel2)

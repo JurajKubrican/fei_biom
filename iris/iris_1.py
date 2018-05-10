@@ -41,7 +41,7 @@ def c_detect(img, cimg):
 
 
     circles = cv2.HoughCircles(imgB, cv2.HOUGH_GRADIENT, 3, 600,
-                               param1=100, param2=32, minRadius=r + 45, maxRadius= math.floor(r* 3))
+                               param1=100, param2=32, minRadius=r + 45, maxR6adius= math.floor(r* 3))
     circles = np.uint16(np.around(circles))
 
 

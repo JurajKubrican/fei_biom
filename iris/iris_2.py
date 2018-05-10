@@ -70,7 +70,7 @@ def processing(path,coord):
     center_down = (int(coord[7]), int(coord[8]))
     center_up = (int(coord[10]), int(coord[11]))
 
-    iris_radius = radiusall - radiuspupil
+    iris_radius = +60          #radiusall - radiuspupil
     nsamples = 360
     samples = np.linspace(0, 2.0 * np.pi, nsamples)[:-1]
     polar = np.zeros((iris_radius, int(nsamples)))
@@ -99,13 +99,18 @@ def processing(path,coord):
             if distdown > radiusdown or distup > radiusup:
                 mask[index][int(np.degrees(theta))] = 255
 
-    filenamep = "C:/Users/Erik/PycharmProjects/fei_biom/iris/polar/" + coord[0]
-    filenamem = "C:/Users/Erik/PycharmProjects/fei_biom/iris/mask/" + coord[0]
-    filename_out = "C:/Users/Erik/PycharmProjects/fei_biom/iris/processing/" + coord[0]
+    # filenamep = "C:/Users/Erik/PycharmProjects/fei_biom/iris/polar/" + coord[0]
+    # print(coord[0].split('/')[2])
+    # filenamem = "C:/Users/Erik/PycharmProjects/fei_biom/iris/mask/" + coord[0]
+    # filename_out = "C:/Users/Erik/PycharmProjects/fei_biom/iris/processing/" + coord[0]
     output = np.concatenate((margin, polar, margin, mask, margin), axis=1)
-    cv2.imwrite(filename_out, output)
-    cv2.imwrite(filenamep, polar)
-    cv2.imwrite(filenamem, mask)
+
+    filename_out = "C:/Users/Erik/PycharmProjects/fei_biom/iris/mask_file/" + coord[0].split('/')[2]
+    # print(filename_out)
+    # cv2.imwrite(filename_out, output)
+    cv2.imwrite(filename_out, mask)
+    # cv2.imwrite(filenamep, polar)
+    # cv2.imwrite(filenamem, mask)
 
 
 
