@@ -256,7 +256,7 @@ def doTheMLP(clasifier, numlayer):
     #     if label in test_labels:
     #         correct+=1
 
-    print(clasifier+" MLP: "+str(((correct / len(labels)) * 100))+"%")
+    print(clasifier + " MLP: " + str(((correct / len(labels)) * 100)) + "%")
 
 
 def doTheSVM(classifier):
@@ -284,7 +284,75 @@ def doTheSVM(classifier):
     labels = clf.predict(test_data)
     test_labels = np.asarray(test_labels)
     correct = np.count_nonzero(labels == test_labels)
-    print(classifier+" SVM: " + str(((correct / len(labels)) * 100)) + "%")
+    print(classifier + " SVM: " + str(((correct / len(labels)) * 100)) + "%")
+
+
+def doSomething(classifier):
+    alldata = pickle.load(open('../cache/' + classifier + '.pickle', 'rb'))
+    train_data = []
+    train_labels = []
+    test_data = []
+    test_labels = []
+    cnt = 0
+    distances = []
+    distances_same = []
+    distances_diff = []
+    for picture in alldata:
+        if cnt is 15:
+            cnt = 0
+        if cnt < 4:
+            train_data.append(np.asarray(alldata[picture]))
+            train_labels.append(picture[:3])
+            cnt += 1
+        elif cnt < 15:
+            test_data.append(np.asarray(alldata[picture]))
+            test_labels.append(picture[:3])
+            cnt += 1
+
+    dist_sum = 0
+
+    for i in range(len(train_data)):
+        for j in range(len(train_data)):
+            if i is j:
+                continue
+            dist = np.sum(np.abs(train_data[i] - train_data[j]))
+            if train_labels[i] == train_labels[j]:
+                distances_same.append(dist)
+            else:
+                distances_diff.append(dist)
+            distances.append(dist)
+    print('Mean: ' + str(np.mean(distances)))
+    print('Mean same: ' + str(np.mean(distances_same)))
+    print('Mean diff: ' + str(np.mean(distances_diff)))
+    print('Var: ' + str(np.var(distances)))
+
+
+def normalize(pic1, pic2, tresh):
+    alldata = pickle.load(open('../cache/PCA.pickle', 'rb'))
+    train_data = []
+    train_labels = []
+    test_data = []
+    test_labels = []
+    cnt = 0
+    mean = 62122.465
+    variance = 52557340.0
+    for picture in alldata:
+        if cnt is 15:
+            cnt = 0
+        if cnt < 4:
+            train_data.append(np.asarray(alldata[picture]))
+            train_labels.append(picture[:3])
+            cnt += 1
+        elif cnt < 15:
+            test_data.append(np.asarray(alldata[picture]))
+            test_labels.append(picture[:3])
+            cnt += 1
+
+    s = math.sqrt(np.sum(np.abs(train_data[pic1] - train_data[pic2])))
+    z = (((s - mean) / variance) * -10000000) - 11770
+
+    return z, z > tresh, train_labels[pic1] == train_labels[pic2]
+
 
 def main():
     # test = detectFace('../cache/extract/face.zip/gt_db/s01/02.jpg')
@@ -309,8 +377,30 @@ def main():
     # pca = doThePCA(outDir)
     # calculateDistances("HOG")
     # calculateDistances("PCA")
-    doTheMLP("HOG", 200)
-    doTheSVM("HOG")
+    # doTheMLP("HOG", 200)
+    # doTheSVM("HOG")
+    # doSomething("PCA")
+    same = []
+    diff = []
+    tresh = 3.9208930067931194
+    for i in range(40):
+        for j in range(40):
+            if i is j:
+                continue
+            if j % 10 is 0:
+                print("i:" + str(i) + ' j:' + str(j))
+            z, is_same = normalize(i, j, tresh)
+            if is_same:
+                same.append(z)
+            else:
+                diff.append(z)
+    mean_same = np.mean(same)
+    mean_diff = np.mean(diff)
+
+    print("Mean same: " + str(mean_same))
+    print("Mean diff: " + str(mean_diff))
+
+    print("Tresh: " + str(np.median([mean_same, mean_diff])))
 
 
 if __name__ == "__main__":
