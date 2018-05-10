@@ -354,6 +354,27 @@ def normalize(pic1, pic2):
     return z, train_labels[pic1] == train_labels[pic2]
 
 
+def show_face(index):
+    alldata = pickle.load(open(os.path.dirname(os.path.abspath(__file__)) + '/../cache/PCA.pickle', 'rb'))
+    train_data = []
+    train_labels = []
+    cnt = 0
+    for picture in alldata:
+        if cnt is 15:
+            cnt = 0
+        if cnt < 4:
+            train_data.append(np.asarray(alldata[picture]))
+            train_labels.append(picture)
+            cnt += 1
+        elif cnt < 15:
+            cnt += 1
+
+    img = cv2.imread(outDir + train_labels[index],0)
+    cv2.imshow('Window', img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+
 def main():
     # test = detectFace('../cache/extract/face.zip/gt_db/s01/02.jpg')
     # folders = os.listdir(fileDir)
@@ -380,24 +401,29 @@ def main():
     # doTheMLP("HOG", 200)
     # doTheSVM("HOG")
     # doSomething("PCA")
-    same = []
-    diff = []
-    tresh = 3.9208930067931194
-    for i in range(40):
-        for j in range(40):
-            if i is j:
-                continue
-            if j % 10 is 0:
-                print("i:" + str(i) + ' j:' + str(j))
-            z, is_same = normalize(i, j)
-            if is_same:
-                same.append(z)
-            else:
-                diff.append(z)
-    mean_same = np.mean(same)
-    mean_diff = np.mean(diff)
+    # same = []
+    # diff = []
+    # tresh = 3.9208930067931194
+    # for i in range(40):
+    #     for j in range(40):
+    #         if i is j:
+    #             continue
+    #         if j % 10 is 0:
+    #             print("i:" + str(i) + ' j:' + str(j))
+    #         z, is_same = normalize(i, j)
+    #         if is_same:
+    #             same.append(z)
+    #         else:
+    #             diff.append(z)
+    # mean_same = np.mean(same)
+    # mean_diff = np.mean(diff)
+    #
+    # print("Mean same: " + str(mean_same))
+    # print("Mean diff: " + str(mean_diff))
+    #
+    # print("Tresh: " + str(np.median([mean_same, mean_diff])))
+    # show_face(3)
 
-    print("Mean same: " + str(mean_same))
-    print("Mean diff: " + str(mean_diff))
 
-    print("Tresh: " + str(np.median([mean_same, mean_diff])))
+# if __name__ == "__main__":
+#     main()
