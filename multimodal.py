@@ -3,6 +3,7 @@ from face.find import normalize as classify_face
 from iris.iris_5 import classify as classify_iris
 
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import numpy as np
 
 
@@ -104,6 +105,10 @@ for item in stats_all:
     all_tpr['iris'].append(item['iris']['tpr'])
     all_tpr['all'].append(item['all']['tpr'])
 
+blue_patch = mpatches.Patch(color='blue', label='Iris')
+red_patch = mpatches.Patch(color='red', label='Ear')
+green_patch = mpatches.Patch(color='green', label='Face')
+yellow_patch = mpatches.Patch(color='yellow', label='All')
 plt.plot(all_fpr['iris'], all_tpr['iris'], '-b')
 plt.plot(all_fpr['ear'], all_tpr['ear'], '-r')
 plt.plot(all_fpr['face'], all_tpr['face'], '-g')
@@ -113,5 +118,6 @@ plt.plot([0, 1], [0, 1], '-')
 plt.xlabel('True positive rate (Sensitivity)')
 plt.ylabel('False positive rate (Specificity)')
 plt.title('ROC')
+plt.legend(handles=[red_patch, blue_patch, green_patch, yellow_patch])
 plt.grid(True)
 plt.show()
