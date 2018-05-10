@@ -1,10 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import cv2
 
 import pickle
 
-file_dir = '../cache/ellipse/ear.zip/'
+file_dir = os.path.dirname(os.path.abspath(__file__)) + '/../cache/ellipse/ear.zip/'
 pickle_dir = os.path.dirname(os.path.abspath(__file__)) + '/../cache/'
 
 # test_index = 3
@@ -88,6 +89,12 @@ def roc():
         print('thresh', thresh)
     return all_fpr, all_tpr
 
+
+def show(i):
+    files = os.listdir(file_dir)
+    img = cv2.imread(file_dir + files[i])
+    cv2.imshow('im' + str(i), img)
+    cv2.waitKey()
 
 # all_fpr, all_tpr = roc()
 #

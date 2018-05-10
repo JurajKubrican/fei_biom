@@ -1,5 +1,7 @@
 from ear.classify import classify as classify_ear
+from ear.classify import show as show_ear
 from face.find import normalize as classify_face
+from face.find import show_face as show_face
 from iris.iris_5 import classify as classify_iris
 
 import matplotlib.pyplot as plt
@@ -49,7 +51,7 @@ def tp_fp(thresh):
             z_face, _ = classify_face(i, j)
             # z_iris, _ = classify_iris(i, j)
             z_iris = 0
-            z = np.mean([z_ear, z_face])
+            z = np.mean([z_ear, z_face, z_iris])
 
             stats['ear'] = tp_fp_helper(stats['ear'], thresh, same, z_ear)
             stats['face'] = tp_fp_helper(stats['face'], thresh, same, z_face)
@@ -68,42 +70,54 @@ def tp_fp(thresh):
                 z_diff['all'].append(z)
 
     return {
-        'ear': {'tpr': stats['ear']['tp'] / (stats['ear']['tp'] + stats['ear']['fn']),
-                'fpr': 1 - (stats['ear']['tn'] / (stats['ear']['fp'] + stats['ear']['tn']))},
-        'face': {'tpr': stats['face']['tp'] / (stats['face']['tp'] + stats['face']['fn']),
-                 'fpr': 1 - (stats['face']['tn'] / (stats['face']['fp'] + stats['face']['tn']))},
-        'iris': {'tpr': stats['iris']['tp'] / (stats['iris']['tp'] + stats['iris']['fn']),
-                 'fpr': 1 - (stats['iris']['tn'] / (stats['iris']['fp'] + stats['iris']['tn']))},
-        'all': {'tpr': stats['all']['tp'] / (stats['all']['tp'] + stats['all']['fn']),
-                'fpr': 1 - (stats['all']['tn'] / (stats['all']['fp'] + stats['all']['tn']))},
-    }
+               'ear': np.mean(z_same['ear']),
+               'face': np.mean(z_same['face']),
+               'iris': np.mean(z_same['iris']),
+               'all': np.mean(z_same['all']),
+           }, {
+               'ear': np.mean(z_diff['ear']),
+               'face': np.mean(z_diff['face']),
+               'iris': np.mean(z_diff['iris']),
+               'all': np.mean(z_diff['all']),
+           }, {
+               'ear': {'tpr': stats['ear']['tp'] / (stats['ear']['tp'] + stats['ear']['fn']),
+                       'fpr': 1 - (stats['ear']['tn'] / (stats['ear']['fp'] + stats['ear']['tn']))},
+               'face': {'tpr': stats['face']['tp'] / (stats['face']['tp'] + stats['face']['fn']),
+                        'fpr': 1 - (stats['face']['tn'] / (stats['face']['fp'] + stats['face']['tn']))},
+               'iris': {'tpr': stats['iris']['tp'] / (stats['iris']['tp'] + stats['iris']['fn']),
+                        'fpr': 1 - (stats['iris']['tn'] / (stats['iris']['fp'] + stats['iris']['tn']))},
+               'all': {'tpr': stats['all']['tp'] / (stats['all']['tp'] + stats['all']['fn']),
+                       'fpr': 1 - (stats['all']['tn'] / (stats['all']['fp'] + stats['all']['tn']))},
+           }
 
 
-stats_all = []
-for thresh in range(-15, 25, 3):
-    print('thresh', thresh)
-    stats = tp_fp(thresh)
-    stats_all.append(stats)
+def show_roc():
+    stats_all = []
+    for thresh in range(-15, 25, 1):
+        print('thresh', thresh)
+        z_same, z_diff, stats = tp_fp(thresh)
+        print(z_same, z_diff)
+        stats_all.append(stats)
 
-all_fpr = {'ear': [],
-           'face': [],
-           'iris': [],
-           'all': []}
-all_tpr = {'ear': [],
-           'face': [],
-           'iris': [],
-           'all': []}
+    all_fpr = {'ear': [],
+               'face': [],
+               'iris': [],
+               'all': []}
+    all_tpr = {'ear': [],
+               'face': [],
+               'iris': [],
+               'all': []}
 
-for item in stats_all:
-    all_fpr['ear'].append(item['ear']['fpr'])
-    all_fpr['face'].append(item['face']['fpr'])
-    all_fpr['iris'].append(item['iris']['fpr'])
-    all_fpr['all'].append(item['all']['fpr'])
+    for item in stats_all:
+        all_fpr['ear'].append(item['ear']['fpr'])
+        all_fpr['face'].append(item['face']['fpr'])
+        all_fpr['iris'].append(item['iris']['fpr'])
+        all_fpr['all'].append(item['all']['fpr'])
 
-    all_tpr['ear'].append(item['ear']['tpr'])
-    all_tpr['face'].append(item['face']['tpr'])
-    all_tpr['iris'].append(item['iris']['tpr'])
-    all_tpr['all'].append(item['all']['tpr'])
+        all_tpr['ear'].append(item['ear']['tpr'])
+        all_tpr['face'].append(item['face']['tpr'])
+        all_tpr['iris'].append(item['iris']['tpr'])
+        all_tpr['all'].append(item['all']['tpr'])
 
 blue_patch = mpatches.Patch(color='blue', label='Iris')
 red_patch = mpatches.Patch(color='red', label='Ear')
@@ -121,3 +135,23 @@ plt.title('ROC')
 plt.legend(handles=[red_patch, blue_patch, green_patch, yellow_patch])
 plt.grid(True)
 plt.show()
+
+
+# show_roc()
+
+
+def compare(x, y):
+    z_ear, same = classify_ear(x, y)
+    z_face, _ = classify_face(x, x)
+    # z_iris, _ = classify_iris(i, j)
+    z_iris = 0
+    z = np.mean([z_ear, z_face, z_iris])
+    show_ear(x)
+    show_ear(y)
+    show_face(x)
+    show_face(y)
+
+    return 0
+
+
+compare(1, 10)
