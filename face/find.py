@@ -375,7 +375,7 @@ def show_face(index):
     cv2.destroyAllWindows()
 
 
-def main():
+# def main():
     # test = detectFace('../cache/extract/face.zip/gt_db/s01/02.jpg')
     # folders = os.listdir(fileDir)
     # totalPictures = 0
