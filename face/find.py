@@ -349,7 +349,7 @@ def normalize(pic1, pic2):
             cnt += 1
 
     s = math.sqrt(np.sum(np.abs(train_data[pic1] - train_data[pic2])))
-    z = (((s - mean) / variance) * -10000000) - 11770
+    z = (((((s - mean) / variance) * -10000000) - 11770) - 3) * 2
 
     return z, train_labels[pic1] == train_labels[pic2]
 

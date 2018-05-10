@@ -53,8 +53,7 @@ def tp_fp(thresh):
                 continue
             z_ear, same = classify_ear(i, j)
             z_face, _ = classify_face(i, j)
-            # z_iris, _ = classify_iris(i, j)
-            z_iris = 0
+            z_iris, _ = classify_iris(i, j)
             z = np.mean([z_ear, z_face, z_iris])
 
             stats['ear'] = tp_fp_helper(stats['ear'], thresh, same, z_ear)

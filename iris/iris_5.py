@@ -6,6 +6,9 @@ import numpy as np
 import os
 import cv2
 
+glob_mean = 0.0300300629155
+glob_var = 0.000251910542739
+
 
 def load_images(path):
     file_dir = os.listdir(path)
@@ -17,11 +20,11 @@ def load_images(path):
                 pass
             else:
                 images.append(os.path.join(path, image))
-    print(len(images))
+    # print(len(images))
     return images
 
 
-def print_img( imgx, imgy):
+def print_img(imgx, imgy):
     simg = cv2.imread(imgx, 0)
     timg = cv2.imread(imgy, 0)
     cv2.imshow(imgx.split('/')[6], simg)
@@ -120,20 +123,17 @@ def test_all_iris(images, masks_data):
 
 
 def classify(ximg, yimg):
-    path_binar = "C:/Users/Erik/PycharmProjects/fei_biom/iris/binarize"
-    path_mask = "C:/Users/Erik/PycharmProjects/fei_biom/iris/mask_file"
-
+    path_binar = os.path.dirname(os.path.abspath(__file__)) + "/binarize"
+    path_mask = os.path.dirname(os.path.abspath(__file__)) + "/mask_file"
     images = load_images(path_binar)
     masks = load_images(path_mask)
 
     # ximg = 1  # index x obrazka
     # yimg = 7  # index y obrazka
-    mean, var = get_mean_var(images, masks)  # priemer a rozptyl
-    z_val = (getHaming(images, masks, ximg, yimg) - mean) / var  # jedna konkretna z hodnota
-    return z_val
+    # mean, var = get_mean_var(images, masks)  # priemer a rozptyl
+    z_val = ((getHaming(images, masks, ximg, yimg) - glob_mean) / glob_var) / 10 + 0  # jedna konkretna z hodnota
+    return z_val, False
     #
     # array_of_z = test_all_iris(images,
     #                            masks)  # vytvori pole vsetkych z hodnot s tym ze index hodnoty v poli je index obrazkov x*y++ (1*2,1*3,1*4... #rovnake indexy preskakuje
 # print_img(images,ximg,yimg)
-
-
